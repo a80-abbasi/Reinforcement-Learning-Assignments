@@ -1,0 +1,470 @@
+\documentclass{article}
+
+\input{setting.tex}
+
+\title{Reinforcement Learning - Assignment 0}
+\author{Ali Abbasi - 98105879}
+\begin{document}
+\maketitle
+\tableofcontents
+\pagebreak
+
+\section{Variance of Estimator}
+\subsection{}
+We know that:
+\begin{align*}
+\var{X} &= \E{X^2} - \E{X}^2\\
+\implies & \E{X^2} = \var{X} + \E{X}^2
+\end{align*}
+Substituting \(X\) with \(W - \theta\), we have:
+\begin{align*}
+\E[\theta]{(W - \theta)^2} &= \var[\theta]{W - \theta} + \E[\theta]{W - \theta}^2\\
+\implies \MSE(W, \theta) &= \var[\theta]{W - \theta} + \E[\theta]{W - \theta}^2\\
+&= \var[\theta]{W - \theta} + (\E[\theta]{W} - \theta)^2 & \tag{\(\theta\) is a constant in the frequentist view}\\
+&= \var[\theta]{W} + (\E[\theta]{W} - \theta)^2 \tag{\(\var{X + a} = \var{X}\) with constant \(a\)}\\
+&= \var[\theta]{W} + \bias[\theta]{W}^2
+\end{align*}
+
+\subsection{}
+We show that its expected value is equal to \(\theta\).
+\begin{align*}
+\hat{\theta} &= \frac{1}{n} \sum_{i=1}^{n} f(X_i)\\
+\implies \E{\hat{\theta}} &= \E{\frac{1}{n} \sum_{i=1}^{n} f(X_i)}\\
+&= \frac{1}{n} \sum_{i=1}^{n} \E{f(X_i)}\\
+&= \frac{1}{n} \sum_{i=1}^{n} \theta\\
+&= \theta
+\end{align*}
+
+\subsection{}
+\begin{align*}
+\theta_1 &= \E{f_1(X)}\\
+&= \int_{0}^{4} \frac{1}{4} \left(1 + (\frac{x}{2})^2\right) dx\\
+&= \frac{7}{3}
+\end{align*}
+
+\begin{align*}
+\theta_2 &= \E{f_2(X)}\\
+&= \int_{0}^{4} \frac{1}{4} (\frac{x}{4})^{10} dx\\
+&= \frac{1}{11}
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{estimator.png}
+\caption{Bias and Variance of two estimators.}
+\end{figure}
+
+The lower value of bias and variance of second estimator is because \(\frac{x}{4}\) is between 0 and 1 and the power of 10 makes them much smaller.
+And function with smaller values will have smaller variance and bias.
+
+\subsection{}
+Suppose we want to estimate \(\theta = \E[p]{f(x)}\).
+We can easily show that the expected value of the new estimator is equal to \(\theta\):
+\begin{align*}
+\E[q]{\frac{p(x)}{q(x)} f(x)} &= \sum_{x} q(x) \frac{p(x)}{q(x)} f(x)\\
+&= \sum_{x} p(x) f(x)\\
+&= \E[p]{f(x)}
+\end{align*}
+This trick is called `change of measure'.
+The same argument can be applied to continuous random variables by simply using integral instead of sum.
+
+Now we calculate the new estimator's variance:
+\begin{align*}
+\var[q]{\frac{p(x)}{q(x)}f(x)} &= \E[q]{\frac{p^2(x)}{q^2(x)}f^2(x)} - \E[q]{\frac{p(x)}{q(x)}f(x)}^2\\
+&= \E[q]{\frac{p^2(x)}{q^2(x)}f^2(x)} - \theta^2\\
+&= \E[p]{\frac{p(x)}{q(x)}f^2(x)} - \theta^2
+\end{align*}
+While the variance of previous estimator was:
+\begin{align*}
+\var[p]{f(x)} &= \E[p]{f^2(x)} - \theta^2
+\end{align*}
+
+\subsection{}
+We will find the \(q(x)\) that minimizes the variance of the new estimator, by using Lagrange multipliers method, because we have to constrain \(q\) to be a probability distribution.
+\begin{align*}
+\argmin_{q(x); \sum_{x}q(x)=1} \E[p]{\frac{p(x)}{q(x)}f^2(x)} - \theta^2
+&= \argmin_{q(x); \sum_{x}q(x)=1} \sum_{x} \frac{p^2(x)}{q(x)} f^2(x)
+\end{align*}
+\begin{align*}
+\implies \mathcal{L} &= \sum_{x} \frac{p^2(x)}{q(x)} f^2(x) + \lambda \left(\sum_{x}q(x) - 1\right)
+\end{align*}
+The variables that the minimization is done with respect to, are \(q(x)\) for each \(x \in \mathcal{X}\) and \(\lambda\). So we have:
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial q(x_0)} &= -\frac{p^2(x_0)}{q^2(x_0)} f^2(x_0) + \lambda = 0\\
+\implies q^2(x_0) &= \frac{1}{\lambda} p^2(x)f^2(x)\\
+\implies q(x_0) &= \frac{1}{\sqrt{\lambda}} p(x)\abs{f(x)}
+\end{align*}
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial \lambda} = 0 \implies q(x_0) = \frac{p(x_0)\abs{f(x_0)}}{\sum_{x'} p(x')\abs{f(x')}}
+\end{align*}
+\begin{align*}
+\implies \forall x \in \mathcal{X}, q(x) &= \frac{p(x)\abs{f(x)}}{\sum_{x'} p(x')\abs{f(x')}}
+\end{align*}
+
+The same argument can be applied to continuous random variables with a bit of change.
+
+\subsection{}
+Variance of estimator \(I_{X > 5}\):
+\begin{align*}
+p &= \E[P]{\mathbbm{1}\left\{X > 5\right\}} \implies f(X) = \mathbbm{1}\left\{X > 5\right\}\\
+p &= \int_{5}^{\infty} \frac{1}{\sqrt{2\pi}} e^{-\frac{x^2}{2}} dx\\
+&\approx 2.9 \times 10^{-7}
+\var[P]{\mathbbm{1}\left\{X > 5\right\}} &= \E[P]{\mathbbm{1}\left\{X > 5\right\}^2} - p^2\\
+&= \E[P]{\mathbbm{1}\left\{X > 5\right\}} - p^2\\
+&= p - p^2 \approx 2.9 \times 10^{-7}
+\end{align*}
+
+Variance of estimator when data are generated from distribution \(Q(x)\):
+\begin{align*}
+\var[Q]{\mathbbm{1}\left\{X > 5\right\}} &= \E[P]{\frac{P(x)}{Q(x)}\mathbbm{1}\left\{X > 5\right\}^2} - p^2\\
+&= \E[P]{\frac{P(x)}{Q(x)}\mathbbm{1}\left\{X > 5\right\}} - p^2\\
+&= \int_{5}^{+\infty} \frac{\left(\frac{1}{\sqrt{2\pi}} e^{-\frac{x^2}{2}}\right)^2}{e^{-(x-5)}} dx - p^2\\
+&\approx 2.4 \times 10^{-13} - 8.4 \times 10^{-14} \approx 1.6 \times 10^{-13}
+\end{align*}
+
+In this example we can see how a good choice of distribution can reduce the variance of the estimator.
+
+\section{Markov Chain}
+\subsection{}
+Assuming initial probability of states to be \(p\), the probability of being in state \(i\) after \(n\) steps is:
+\begin{align*}
+P(X_n=i) &= \sum_{j} P(X_n=i|X_0=j) P(X_0=j)\\
+&= \sum_{j} P^{(n)}_{ji} p_j\\
+&= (p P^{(n)})_i
+\end{align*}
+
+So \(P(X_n)\) only depends on \(P^{(n)}\) and \(p\).
+
+\subsection{}
+Based on the definition of Markov chain, given \(X_i\), \(X_{i+1}\) is independent of \(X_0, X_1, \dots, X_{i-1}\).\\
+For more simplicity, we define:
+\begin{align*}
+A &\triangleq \left\{X_{F_1}, X_{F_2}, \dots, X_{F_n}\right\}\\
+t &\triangleq t_1 + t_2\\
+m &\triangleq \max\{F_i\}\\
+\end{align*}
+We have:
+\begin{align*}
+P(X_t|A) &= \sum_{x_{t-1}, \dots, x_{m+1}} P(X_t, X_{t-1}, \dots, X_{m+1}|A)\\
+&= \sum_{x_{t-1}, \dots, x_{m+1}} P(X_t|X_{t-1}, \dots, X_{m+1}, A) P(X_{t-1}|X_{t-2}, \dots, X_{m+1}, A) \dots P(X_{m+1}|A)\\
+&= \sum_{x_{t-1}, \dots, x_{m+1}} P(X_t|X_{t-1}) P(X_{t-1}|X_{t-2}) \dots P(X_{m+1}|X_{m})\\
+&= \sum_{x_{t-1}, \dots, x_{m+1}} P(X_t, X_{t-1}, \dots, X_{m+1}|X_{m})\\
+&= P(X_t|X_{m})
+\end{align*}
+
+% Note than since \(X_m\) is in \(A\), \(P(X_{m+1}|A) = P(X_{m+1}|X_m)\).
+% Because \(X_{m+1}\) is independent of all other \(X_{F_i}\)s given \(X_m\).
+
+
+\subsection{}
+\begin{align*}
+P_{ij}^{(n + m)} &= P(X_{t+n+m}=j|X_t=i)\\
+&= \sum_{k} P(X_{t+n+m}=j|X_{t+n}=k) P(X_{t+n}=k|X_t=i)\\
+&= \sum_{k} P_{kj}^{(m)} P_{ik}^{(n)}\\
+&= (P^{(n)} P^{(m)})_{ij}\\
+\implies P^{(n+m)} &= P^{(n)} P^{(m)}
+\end{align*}
+
+\subsection{}
+Its steady state distribution will be \(\left[\pi_1, \pi_2, \dots, \pi_n\right]\) (\(\pi_i\)s are row vectors).
+Because:
+\begin{align*}
+\left[\pi_1, \pi_2, \dots, \pi_n\right] \begin{bmatrix}
+P_{1} & 0 & \dots & 0\\
+0 & P_{2} & \dots & 0\\
+\vdots & \vdots & \ddots & \vdots\\
+0 & 0 & \dots & P_{n}
+\end{bmatrix}
+&= \left[\pi_1P_{1}, \pi_2P_{2}, \dots, \pi_nP_{n}\right]\\
+&= \left[\pi_1, \pi_2, \dots, \pi_n\right]
+\end{align*}
+
+If there are several steady state distributions, behavior of the chain will depend on the initial state.
+
+\subsection{}
+Assuming the initial distribution of states to be \(p\), we have:
+\begin{align*}
+\lim_{n \to \infty} (p P^{(n)})_i &= \lim_{n \to \infty} \sum_{j} p_j P^{(n)}_{ji}\\
+&= \sum_{j} p_j \lim_{n \to \infty} P^{(n)}_{ji}\\
+&= \sum_{j} p_j \pi_l(i)\\
+&= \pi_l(i) \sum_{j} p_j\\
+&= \pi_l(i)
+\end{align*}
+\begin{align*}
+\implies \lim_{n \to \infty} (p P^{(n)}) = \pi_l
+\end{align*}
+
+This both shows that the \(\pi_l\) is the steady state distribution of this Markov chain based on the definition in the previous part, and also shows that the initial distribution of states doesn't affect the long term behavior of the chain.
+Because for any initial distribution \(p\), we have the same distribution of states after a long time.
+
+
+\section{Information Theory}
+\subsection{}
+\begin{align*}
+&\forall x: \quad 0\le P(x) \le 1 \implies \forall x: \quad \log P(x) \le 0\\
+\implies &\forall x: \quad P(x) \log P(x) \le 0\\
+\implies &\sum_{x} P(x) \log P(x) \le 0\\
+\implies & H(X) \ge 0
+\end{align*}
+
+\subsection{}
+\label{sec:3b}
+Intuitively, uniform distribution has the highest entropy, because it has the most uncertainty.
+We can compute the entropy of a discrete uniform distribution easily as follows:
+\begin{align*}
+% \text{Suppose } x &\in \mathcal{X} = \{1, 2, \dots, M\}\\
+\text{Suppose } & U \text{ is a uniform discrete distribution that can obtain } M \text{ distinct value.}\\
+H(U) &= -\sum_{x} P(x) \log P(x)\\
+&= - \sum_{x} \frac{1}{M} \log \frac{1}{M}\\
+&= \frac{1}{M} \log M \sum_{x} 1\\
+&= \log M
+\end{align*}
+
+And we can confirm our intuition by showing that for a random variable with \(M\) distinct values, the entropy is at most \(\log M\):
+\begin{align*}
+H(X) &= \E[P]{\log \frac{1}{P(x)}}\\
+\xrightarrow[\text{using Jensen inequality}]{\log \text{ is concave}} & \le \log \E[P]{\frac{1}{P(x)}}\\
+&= \log \sum_{x} P(x) \frac{1}{P(x)}\\
+&= \log \sum_{x} 1\\
+&= \log M
+\end{align*}
+
+\subsection{}
+\label{sec:3c}
+\begin{align*}
+H(X, Y) &= - \sum_{x, y} P(x, y) \log P(x, y)\\
+&= - \sum_{x, y} P(x, y) \log P(x) P(y|x)\\
+&= - \sum_{x, y} P(x, y) \log P(x) - \sum_{x, y} P(x, y) \log P(y|x)\\
+&= \sum_{x} \log P(x) \sum_{y} P(x, y) - \sum_{x, y} P(x, y) \log P(y|x)\\
+&= \sum_{x} P(x) \log P(x) - \sum_{x, y} P(x, y) \log P(y|x)\\
+&= H(X) + H(Y|X)
+\end{align*}
+We can show that \(H(X, Y) = H(Y, X) = H(Y) + H(X|Y)\) by using a similar approach.
+
+\subsection{}
+\begin{align*}
+- \divg{P}{Q} &= - \sum_{x} P(x) \log \frac{P(x)}{Q(x)}\\
+&= \sum_{x} P(x) \log \frac{Q(x)}{P(x)}\\
+&= \E[P]{\log \frac{Q(x)}{P(x)}} \label{eq:log_arg}\tag*{\(\star\)}\\
+\xrightarrow[\text{using Jensen inequality}]{\log \text{ is concave}} & \le \log \E[P]{\frac{Q(x)}{P(x)}}\\
+&= \log \sum_{x} P(x) \frac{Q(x)}{P(x)}\\
+&= \log \sum_{x} Q(x) = \log 1 = 0\\
+\implies \divg{P}{Q} &\ge 0
+\end{align*}
+
+Moreover, we know that Jensen inequality becomes equality, if and only if the argument of the strictly convex (or concave) function is always constant.
+That means if \({\D}_{KL} = 0\), in equation \eqref{eq:log_arg} we have: \(\forall x: \frac{Q(x)}{P(x)} = \) constant.
+Which implies that \(\forall x: P(x) = Q(x)\).
+
+(Of course, showing one side of the above statement, i.e., KL divergence of identical distributions being zero was easy:
+\begin{align*}
+\divg{P}{P} &= \sum_{x} P(x) \log \frac{P(x)}{P(x)}\\
+&= \sum_{x} P(x) \log 1\\
+&= 0)
+\end{align*}
+
+
+\subsection{}
+We can show that \(\divg{P}{U} = - H(P) + \log M\).
+\begin{align*}
+\divg{P}{U} &= \sum_{x} P(x) \log \frac{P(x)}{\frac{1}{M}}\\
+&= \sum_{x} P(x) \log P(x) + \sum_{X} P(x) \log M\\
+&= - H(P) + \log M \sum_x P(x)\\
+&= -H(P) + \log M
+\end{align*}
+
+Instead of what we did in Section~\ref{sec:3b}, we could have used this equivalence to show that for every distribution \(P\) with \(M\) possible values, \(H(P) \le \log M\):
+\begin{align*}
+& \divg{P}{U} \ge 0\\
+\implies & -H(P) + \log M \ge 0\\
+\implies & H(P) \le \log M
+\end{align*}
+
+And by using the argument in last part for \({\D}_{KL} = 0\), we can show that:
+\begin{align*}
+H(P) = \log M \text{ iff } \divg{P}{U} = 0 \text{ iff } P = U
+\end{align*}
+
+\subsection{}
+\label{sec:3f}
+First we show the following property of Mutual Information and Entropy:
+\begin{align*}
+I(X; Y) &= \divg{P(X, Y)}{P(X)P(Y)}\\
+&= \sum_{x, y} P(x, y) \log \frac{P(x, y)}{P(x)P(y)}\\
+&= \sum_{x, y} P(x, y) \log \frac{P(x, y)}{P(y)} - \sum_{x, y} P(x, y) \log P(x)\\
+&= \sum_{x, y} P(x, y) \log P(x|y) - \sum_{x, y} P(x, y) \log P(x)\\
+&= \sum_{x, y} P(x, y) \log P(x|y) - \sum_{x} \log P(x) \sum_{y} P(x, y)\\
+&= \sum_{x, y} P(x, y) \log P(x|y) - \sum_{x} P(x) \log P(x)\\
+&= - H(X|Y) + H(X)
+\end{align*}
+Now using the non-negativity of KL divergence, we can show that:
+\begin{align*}
+& I(X; Y) \ge 0\\
+\implies & - H(X|Y) + H(X) \ge 0\\
+\implies & H(X|Y) \le H(X)
+\end{align*}
+This is known as `Information never hurts' property of Mutual Information!\\
+(When do we have equality? When \(I(X;Y) = 0\), i.e. when \(P(X, Y) = P(X)P(Y)\), or in other words, when \(X\) and \(Y\) are independent.)
+
+\subsection{}
+\subsubsection{}
+We can prove it using results of Section~\ref{sec:3f}:
+\begin{align*}
+\begin{drcases}
+I(X, Y; Z) = H(Z) - H(Z|X, Y)\\
+I(X; Z) = H(Z) - H(Z|X)\\
+H(Z|X, Y) \le H(Z|X)
+\end{drcases}
+% \implies I(X, Y; Z) &\ge H(Z) - H(Z|X)\\
+\implies I(X, Y; Z) \ge I(X; Z)
+\end{align*}
+We have equality if and only if \(H(Z|X, Y) = H(Z|X)\).\\   
+That means \(I(Z, Y|X) = H(Z|X) - H(Z|X, Y) = 0\), i.e. \(Z\) and \(Y\) are independent given \(X\).
+\subsubsection{}
+Using \ref{sec:3c}:
+\begin{align*}
+\begin{drcases}
+H(X, Y|Z) = H(X|Z) + H(Y|X, Z)\\
+H(Y|X, Z) \ge 0
+\end{drcases}
+\implies H(X, Y|Z) \ge H(X|Z)
+\end{align*}
+We have equality if and only if \(H(Y|X, Z) = 0\), which means if \(X\) and \(Z\) are known, then there is no uncertainty about \(Y\), and it is known as well.
+In other words, \(Y\) is totally dependent on \(X\) and \(Z\): \(Y = f(X, Z)\).
+
+\subsection{}
+\subsubsection{}
+\begin{table}[H]
+\centering
+\begin{tabular}{c|c|c|c}
+X & Y & Z & P(X, Y, Z)\\
+\hline
+1 & 0 & 1 & \(\frac{1}{4}\)\\
+0 & 1 & 1 & \(\frac{1}{4}\)\\
+0 & 0 & 0 & \(\frac{1}{4}\)\\
+1 & 1 & 0 & \(\frac{1}{4}\)    
+\end{tabular}
+\caption{Joint distribution of \(X, Y, Z\). Probability of other possible values of \(X, Y, Z\) is zero.}
+\end{table}
+
+As you can see, when \(Z\) is not given, then \(X\) and \(Y\) are independent and \(I(X; Y) = 0\).\\
+And when \(Z=0\) is given:
+\begin{align*}
+I(X; Y|Z=0) &= \frac{1}{2} \log \frac{\frac{1}{2}}{\frac{1}{2} \frac{1}{2}} + \frac{1}{2} \log \frac{\frac{1}{2}}{\frac{1}{2} \frac{1}{2}}\\
+&= 2 \times \frac{1}{2} \log 2 = 1
+\end{align*}
+\(I(X;Y|Z=1)\) can be shown to be 1 similarly. So:
+\begin{align*}
+I(X; Y|Z) = P(Z=0) I(X; Y|Z=0) + P(Z=1) I(X; Y|Z=1) = 1
+\end{align*}
+
+\subsubsection{}
+\begin{table}[H]
+\centering
+\begin{tabular}{c|c|c|c}
+X & Y & Z & P(X, Y, Z)\\
+\hline
+1 & 1 & 1 & \(\frac{1}{2}\)\\   
+0 & 0 & 0 & \(\frac{1}{2}\)
+\end{tabular}
+\caption{Joint distribution of \(X, Y, Z\). Probability of other possible values of \(X, Y, Z\) is zero.}
+\end{table}
+
+In this case, when (for example) \(Z=0\) is given, then \(X\) and \(Y\) are independent. Because:
+\begin{align*}
+P(x, y|z=0) = P(x|z=0)P(y|z=0) =
+\begin{cases}
+1 & \text{if } x=y=0\\    
+0 & \text{otherwise}
+\end{cases}
+\end{align*}
+Similarly when \(Z=1\) is given, then \(X\) and \(Y\) are independent as well.
+Therefore, \(I(X; Y|Z) = 0\).
+
+And when there is no information about \(Z\), then \(X\) and \(Y\) are totally dependent and \(I(X; Y) = 1\):
+\begin{align*}
+I(X;Y) &= \frac{1}{2} \log \frac{\frac{1}{2}}{\frac{1}{2} \frac{1}{2}} + \frac{1}{2} \log \frac{\frac{1}{2}}{\frac{1}{2} \frac{1}{2}}\\
+&= 2 \times \frac{1}{2} \log 2 = 1
+\end{align*}
+
+\section{Probabilistic Models and Latent Variables}
+\subsection{}
+Suppose \(P_{data}(x)\) is empirical distribution of data and \(P_\theta(x)\) is our model's distribution. Then:
+\begin{align*}
+\divg{P_{data}}{P_\theta} &= \E[P_{data}]{\log \frac{P_{data}(x)}{P_\theta(x)}}\\
+&= \E[P_{data}]{\log P_{data}(x)} - \E[P_{data}]{\log P_\theta(x)}\\
+&= -H(P_{data}) - \E[P_{data}]{\log P_\theta(x)}
+\end{align*}
+So minimizing \(\divg{P_{data}}{P_\theta}\) is equivalent to maximizing \(\E[P_{data}]{\log P_\theta(x)}\).
+And we can show that maximizing \(\E[P_{data}]{\log P_\theta(x)}\) is equivalent to maximizing likelihood of data:
+\begin{align*}
+\argmax_\theta \E[P_{data}]{\log P_\theta(x)} &= \argmax_\theta \frac{1}{N} \sum_{i=1}^N \log P_\theta(x_i)\\
+&= \argmax_\theta \log \prod_{i=1}^N P_\theta(x_i)\\
+&= \argmax_\theta \prod_{i=1}^N P_\theta(x_i)\\
+&= \argmax_\theta P_\theta(\mathcal{D})
+\end{align*}
+Where \(\mathcal{D} = \{x_1, x_2, \dots, x_N\}\) is the data set.
+
+\subsection{}
+(We use sum for simplicity, but it can be generalized to integral for continuous variables as well.)
+\begin{align*}
+\ell(\theta; X) &= \log P_\theta(X) = \log \sum_{Z} P_\theta(X, Z)\\
+&= \log \sum_{Z} Q(Z) \frac{P_\theta(X, Z)}{Q(Z)}\\
+\xrightarrow{\text{Jensen}} &\ge \sum_{Z} Q(Z) \log \frac{P_\theta(X, Z)}{Q(Z)}\\
+&= \sum_{Z} Q(Z) \log \frac{P_\theta(X, Z)}{Q(Z)} - \sum_{Z} Q(Z) \log Q(Z)\\
+&= \E[Z\sim Q]{\log P_\theta(X, Z)} + H(Q) = \mathcal{L}(\theta, Q)
+\end{align*}
+
+\subsection{}
+We'll show that choosing \(Q(Z) = P_\theta(Z|X)\) \textbf{maximizes} \(\mathcal{L}(\theta, Q)\).\\
+\begin{align*}
+\ell(\theta; X) - \mathcal{L}(\theta, Q) &= \log P_\theta(X) - \sum_{Z} Q(Z) \log \frac{P_\theta(X, Z)}{Q(Z)}\\
+&= \sum_{Z} Q(Z) \log P_\theta(X) - \sum_{Z} Q(Z) \log \frac{P_\theta(X, Z)}{Q(Z)}\\
+&= \sum_{Z} Q(Z) (\log P_\theta(X) - \log \frac{P_\theta(X, Z)}{Q(Z)})\\
+&= \sum_{Z} Q(Z) (\log Q(Z) - \log \frac{P_\theta(X, Z)}{P_\theta(X)})\\
+&= \sum_{Z} Q(Z) (\log Q(Z) - \log P_\theta(Z|X))\\
+&= \sum_{Z} Q(Z) \log \frac{Q(Z)}{P_\theta(Z|X)}\\
+&= \divg{Q}{P_\theta(Z|X)}
+\end{align*}
+So:
+\begin{align*}
+\ell(\theta; X) = \mathcal{L}(\theta, Q) \iff \divg{Q}{P_\theta(Z|X)} = 0 \iff Q(Z) = P_\theta(Z|X)
+\end{align*}
+And we know \(\ell(\theta; X)\) is an upper bound of \(\mathcal{L}(\theta, Q)\), so choosing \(Q(Z) = P_\theta(Z|X)\) maximizes \(\mathcal{L}(\theta, Q)\).
+
+\subsection{}
+According to Bayes' rule, \(P_\theta(Z|X) = \frac{P_\theta(X, Z)}{P_\theta(X)} = \frac{P_\theta(X|Z)P_\theta(Z)}{P_\theta(X)}\).
+But computing \(P_\theta(X)\) is intractable may be intractable. Because either \(P_\theta(X) = \int_Z P_\theta(X|Z)P_\theta(Z) dZ\) and this integral might be intractable. Or for discrete latent variables, \(P_\theta(X) = \sum_Z P_\theta(X|Z)P_\theta(Z)\), and when the latent variable has many possible values, then this sum is intractable. 
+
+\subsection{}
+Substituting \(Q_\phi(Z|X)\) with \(P_\theta(Z|X)\) in the above lower bound, we get:
+\begin{align*}
+\sum_{Z} Q_\phi(Z|X) \log \frac{P_\theta(X, Z)}{Q_\phi(Z|X)} &= \sum_{Z} Q_\phi(Z|X) \log \frac{P_\theta(X|Z)P_\theta(Z)}{Q_\phi(Z|X)}\\
+&= \sum_{Z} Q_\phi(Z|X) \log P_\theta(X|Z) + \sum_{Z} Q_\phi(Z|X) \log \frac{P_\theta(Z)}{Q_\phi(Z|X)}\\
+&= \E[Q_\phi(Z|X)]{\log P_\theta(X|Z)} - \divg{Q_\phi(Z|X)}{P_\theta(Z)} = L[\theta, \phi]
+\end{align*}
+
+\subsection{}
+Penalizing the KL divergence between \(Q_\phi(Z|X)\) and \(P_\theta(Z)\) acts as a regularization.
+Without it, the model can learn narrow distributions for \(Q_\phi(Z|X)\), which actually map every \(X\) to a single \(Z\) in the latent space.
+This is overfitting on the training data and the model will not generalize well on the unseen data.
+Encouraging the model to learn a distribution similar to the prior \(P_\theta(Z)\) will help the model avoid this problem.
+
+\subsection{}
+For this part, we need to show that \(\divg{Q_\phi(Z|X)}{P_\theta(Z)} = \divg{Q_\phi(Z)}{P_\theta(Z)} + I_{Q_\phi}(X; Z)\).
+But in my opinion, this equality does not hold.
+Because LHS of the equality depends on the value of \(X\), but RHS is expectation over all possible values of \(X\) and does not depend on a specific value of \(X\).\\
+Instead, I will show that \(\E[Q(x)]{\divg{Q_\phi(Z|X)}{P_\theta(Z)}} = \divg{Q_\phi(Z)}{P_\theta(Z)} + I_{Q_\phi}(X; Z)\)
+\begin{align*}
+I_{Q_\phi}(X; Z) &= \E[Q_\phi(X, Z)]{\log \frac{Q_\phi(X, Z)}{Q_\phi(X)Q_\phi(Z)}}\\
+&= \E[Q_\phi(X, Z)]{\log \frac{Q_\phi(Z|X)}{Q_\phi(Z)}}\\
+&= \E[Q_\phi(X, Z)]{\log \frac{Q_\phi(Z|X)P_\theta(Z)}{Q_\phi(Z)P_\theta(Z)}}\\
+&= \E[Q_\phi(X, Z)]{\log \frac{Q_\phi(Z|X)}{P_\theta(Z)}} + \E[Q_\phi(X, Z)]{\log \frac{P_\theta(Z)}{Q_\phi(Z)}}\\
+&= \E[Q_\phi(X)]{\E[Q_\phi(Z|X)]{\log \frac{Q_\phi(Z|X)}{P_\theta(Z)}}} - \E[Q_\phi(z)]{\log \frac{Q_\phi(Z)}{P_\theta(Z)}}\\
+&= \E[Q_\phi(X)]{\divg{Q_\phi(Z|X)}{P_\theta(Z)}} - \divg{Q_\phi(Z)}{P_\theta(Z)}
+\end{align*}
+\begin{align*}
+\implies \E[Q_\phi(X)]{\divg{Q_\phi(Z|X)}{P_\theta(Z)}} &= \divg{Q_\phi(Z)}{P_\theta(Z)} + I_{Q_\phi}(X; Z)
+\end{align*}
+
+\end{document}
